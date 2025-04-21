@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    server-->>browser: HTML document
+    deactivate server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    server-->>browser: the css file
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    server-->>browser: the JavaScript SPA file
+
+    Note right of browser: El navegador ejecuta el JavaScript y renderiza la interfaz
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    server-->>browser: Lista de notas en formato JSON
+
+    Note right of browser: Las notas se muestran dinámicamente sin recargar la página

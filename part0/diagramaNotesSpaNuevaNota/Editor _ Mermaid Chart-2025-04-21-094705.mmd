@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    Note right of browser: Usuario escribe la nota y hace clic en "Save"
+
+    Note right of browser: JS intercepta el formulario y evita el comportamiento por defecto
+
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    activate server
+    server-->>browser: HTTP 201 Created (o similar)
+    deactivate server
+
+    Note right of browser: La nueva nota se agrega a la lista en el frontend sin recargar la página
