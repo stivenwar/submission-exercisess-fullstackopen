@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState , useEffect} from 'react'
+import personService from './services/service.jsx'
 import PersonForm from "./PersonForm.jsx";
 import Filter from "./Filter.jsx";
 import Persons from "./Persons.jsx";
@@ -14,10 +15,45 @@ const App = () => {
     const [isSearch, setIsSearch] = useState(false)
     const [newSearch, setNewSearch] = useState('')
 
+
+    useEffect(() => {
+        console.log("effect")
+        personService
+            .getAll()
+            .then(response=> {
+                // console.log(response.data)
+                const data = response.data
+                let countData = data.length > 0 ? Math.max(...data.map(p => p.id)) : 0;
+                // console.log(countData)
+                setIdPerson(countData)
+                setPersons(data)
+            })
+
+    },[])
+
+    // useEffect(() => {
+    //     console.log('effect')
+    //
+    //     const eventHandler = response => {
+    //         console.log('promise fulfilled')
+    //         setPersons(response.data)
+    //     }
+    //
+    //     const promise = axios.get('http://localhost:3001/notes')
+    //     promise.then(eventHandler)
+   // setReload(prev => !prev); para reload entera la info
+    // }, [reload])
+
     const addInfoPerson = (event) => {
         event.preventDefault()
         // console.log(event.target)
-        const exist = persons.find(person =>person.name === newName)
+        const existName = persons.find(person => {
+            if (person.name === newName){
+                return person
+            }
+        })
+        console.log(existName)
+
 
         if (!newNumber) {
             alert(`Number is empty`)
@@ -28,20 +64,51 @@ const App = () => {
             return
         }
 
-        if (exist){
-            alert(`${newName} is already added to phonebook`)
-        }else {
+        if (existName){
+            const confirm = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one`)
+            if (confirm){
 
+                personService.update(existName.id,{id: existName.id,name:existName.name,number: newNumber})
+                setNewName("")
+                setNewNumber("")
+            }
+            // alert(`${newName} is already added to phonebook`)
+
+        } else {
+
+          let  count = idPerson+1
             const  objectName = {
                 name : newName,
                 number : newNumber,
-                id: idPerson
+                id: count.toString()
             }
-            setPersons(persons.concat(objectName))
-            setNewName("")
-            setNewNumber("")
-            setIdPerson(idPerson+1)
+            setIdPerson(count)
+            console.log(objectName.id)
+            personService.create(objectName).then(responce => {
+                console.log(responce.data)
+                setNewName("")
+                setNewNumber("")
+                setPersons(prev => [...prev, objectName]);
+
+
+            })
         }
+
+    }
+    const handleDelete = (id, name) => {
+        const confirm = window.confirm(`delete ${name}`)
+
+        if (confirm){
+            personService.deletePerson(id).then(e => {
+                console.log(e)
+                setPersons(prev => prev.filter(elem =>elem.id !== id))
+
+            }).catch(error=> {
+                console.log(error)
+            })
+        }
+
+
 
     }
     const handleNameChange = (event) => {
@@ -91,7 +158,7 @@ const App = () => {
             {/*<div>debug: {newName}</div>*/}
             {/*<div>debug: {newNumber}</div>*/}
 
-            <Persons isSearch={isSearch} persons={persons} personsFilter={personsFilter}  />
+            <Persons  handleDelete={handleDelete} isSearch={isSearch} persons={persons} personsFilter={personsFilter}  />
 
         </div>
     )
