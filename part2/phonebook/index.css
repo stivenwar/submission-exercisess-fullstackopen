@@ -1,0 +1,18 @@
+.addedUserStyle{
+    background-color: darkgray;
+    border: solid darkgreen;
+    color: darkgreen;
+    padding: 20px;
+}
+.errorUserStyleRed{
+    background-color: darkgray;
+    border: solid red;
+    color: red;
+    padding: 20px;
+}
+.closeDiv{
+    display: none;
+}
+.openDiv {
+    display: block;
+}

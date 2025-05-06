@@ -3,6 +3,7 @@ import personService from './services/service.jsx'
 import PersonForm from "./PersonForm.jsx";
 import Filter from "./Filter.jsx";
 import Persons from "./Persons.jsx";
+import "../index.css"
 
 const App = () => {
     const [persons, setPersons] = useState([
@@ -14,6 +15,8 @@ const App = () => {
     const [idPerson, setIdPerson] = useState(1)
     const [isSearch, setIsSearch] = useState(false)
     const [newSearch, setNewSearch] = useState('')
+    const [openDivAdded, setOpenDivAdded] = useState(false)
+    const [openDivError, setOpenDivError] = useState(false)
 
 
     useEffect(() => {
@@ -24,7 +27,7 @@ const App = () => {
                 // console.log(response.data)
                 const data = response.data
                 let countData = data.length > 0 ? Math.max(...data.map(p => p.id)) : 0;
-                // console.log(countData)
+                // console.log(data)
                 setIdPerson(countData)
                 setPersons(data)
             })
@@ -68,7 +71,15 @@ const App = () => {
             const confirm = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one`)
             if (confirm){
 
-                personService.update(existName.id,{id: existName.id,name:existName.name,number: newNumber})
+                personService.update(existName.id,{id: existName.id,name:existName.name,number: newNumber}).then(responce => {
+                    console.log(responce)
+                }).catch(error => {
+                    console.log(error)
+                    setOpenDivError(true)
+                    setTimeout(()=> {
+                        setOpenDivError(false)
+                    },5000)
+                })
                 setNewName("")
                 setNewNumber("")
             }
@@ -86,7 +97,12 @@ const App = () => {
             console.log(objectName.id)
             personService.create(objectName).then(responce => {
                 console.log(responce.data)
-                setNewName("")
+                setOpenDivAdded(true)
+                setTimeout(()=> {
+                    setOpenDivAdded(false)
+                    setNewName("")
+                },3000)
+                // setNewName("")
                 setNewNumber("")
                 setPersons(prev => [...prev, objectName]);
 
@@ -143,8 +159,29 @@ const App = () => {
         newNumber: newNumber
     }
 
+    const AddedUserAlert = (props) => {
+
+        return (
+            <div className={ openDivAdded?"addedUserStyle openDiv" :" closeDiv"}>
+                Added {props.name}
+            </div>
+        )
+    }
+    const ErrorUserAlert = (props) => {
+
+        return (
+            <div className={ openDivError?"errorUserStyleRed openDiv" :" closeDiv"}>
+                Information of {props.name} has already been removed from server.
+            </div>
+        )
+    }
+
     return (
         <div>
+
+            <AddedUserAlert name={newName}/>
+            <ErrorUserAlert name={newName}/>
+
             <h2>Phonebook</h2>
 
             <Filter handlePersonShow={handlePersonShow} newSearch={newSearch}/>
